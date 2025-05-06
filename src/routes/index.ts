@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { healthRouter } from "../controllers/health.controller";
+import { Router } from 'express'
+import { estadoCtaRouter } from '../controllers/estado-cuenta.controller'
 
-const router = Router();
+const router = Router()
 
-router.use("/health", healthRouter);
+router.use('/estado-cuenta', estadoCtaRouter)
 
-export default router;
+export default router

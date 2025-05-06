@@ -9,7 +9,7 @@ export const config = {
     server: process.env.DB_SERVER || '',
     database: process.env.DB_NAME || '',
     options: {
-      encrypt: false, // true si usas Azure
+      encrypt: false,
       trustServerCertificate: true, // para conexiones locales
     },
   },
