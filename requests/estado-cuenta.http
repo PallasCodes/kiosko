@@ -3,7 +3,7 @@ GET http://localhost:3000/api/estado-cuenta/info-cliente
 
 ###
 GET http://localhost:3000/api/estado-cuenta/estados
-  ?rfc=GOUJ5507242K5
+  ?rfc=GODR830305J19
 
 ###
 POST http://localhost:3000/api/estado-cuenta/enviar-codigo
