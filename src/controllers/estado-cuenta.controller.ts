@@ -11,8 +11,8 @@ estadoCtaRouter.get('/info-cliente', async (req: Request, res: Response) => {
   const pool = await getConnection()
   const result = await pool
     .request()
-    .input('rfc', sql.VarChar, rfc ?? '')
-    .input('numCel', sql.VarChar, numCel ?? '')
+    .input('rfc', sql.VarChar, rfc ?? null)
+    .input('numCel', sql.VarChar, numCel ?? null)
     .query(
       `
       SELECT TOP 1 
@@ -24,16 +24,10 @@ estadoCtaRouter.get('/info-cliente', async (req: Request, res: Response) => {
             ISNULL(PF.apellidoMaterno, '')
         )) AS nombre,
         C.contacto AS celular
-      FROM intermercado.dbo.personaFisica AS PF WITH (NOLOCK)
-      INNER JOIN intermercado.dbo.contacto AS C WITH (NOLOCK)
+      FROM gbplus.dbo.personaFisica AS PF WITH (NOLOCK)
+      INNER JOIN gbplus.dbo.personaFisicaContacto AS C WITH (NOLOCK)
         ON PF.idPersonaFisica = C.idPersonaFisica
-        AND LEN(C.contacto) = 10
-      INNER JOIN intermercado.dbo.catalogo AS CA WITH (NOLOCK)
-        ON C.idTipo = CA.idCatalogo
-        AND CA.idCatalogo = 1302
-        AND CA.activo = 'S'
       WHERE PF.rfc = @rfc OR C.contacto = @numCel
-      ORDER BY C.tiempoActualizacion DESC
       `
     )
 

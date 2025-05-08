@@ -1,5 +1,5 @@
 GET http://localhost:3000/api/estado-cuenta/info-cliente
-  ?rfc=FOBD891211MX4
+  ?rfc=TEST651002AJ1
 
 ###
 GET http://localhost:3000/api/estado-cuenta/estados
