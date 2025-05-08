@@ -4,4 +4,11 @@ GET http://localhost:3000/api/estado-cuenta/info-cliente
 ###
 GET http://localhost:3000/api/estado-cuenta/estados
   ?rfc=GOUJ5507242K5
-    
+
+###
+POST http://localhost:3000/api/estado-cuenta/enviar-codigo
+  Content-Type: application/json
+
+{
+  "celular": "2281237048"
+}

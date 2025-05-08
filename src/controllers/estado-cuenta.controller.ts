@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express'
+
 import { getConnection, sql } from '../config/db'
+import { getRandomCode } from '../utils/getRandomCode'
 
 export const estadoCtaRouter = Router()
 
@@ -21,7 +23,7 @@ estadoCtaRouter.get('/info-cliente', async (req: Request, res: Response) => {
             ISNULL(PF.apellidoPaterno, ''), ' ',
             ISNULL(PF.apellidoMaterno, '')
         )) AS nombre,
-        C.contacto 
+        C.contacto AS celular
       FROM intermercado.dbo.personaFisica AS PF WITH (NOLOCK)
       INNER JOIN intermercado.dbo.contacto AS C WITH (NOLOCK)
         ON PF.idPersonaFisica = C.idPersonaFisica
@@ -96,4 +98,30 @@ estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
     )
 
   res.status(200).json({ ...result.recordset })
+})
+
+estadoCtaRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
+  const { celular } = req.body
+
+  const codigo = getRandomCode(6)
+
+  try {
+    const pool = await getConnection()
+    await pool
+      .request()
+      .query(`SELECT dbo.fn_Sms('${celular}', '${codigo}') Envio;`)
+    await pool
+      .request()
+      .input('descripcion', sql.VarChar, `Envio de SMS al ${celular}`)
+      .input('sms', sql.Int, 1)
+      .query(
+        `INSERT INTO intermercado.dbo.bitacora_kiosco (descripcion, sms) VALUES (@descripcion, @sms)`
+      )
+
+    res.status(200).json({ message: 'SMS enviado correctamente' })
+  } catch (error) {
+    console.error('Error al enviar el SMS:', error)
+    res.status(500).json({ message: 'Error al enviar el SMS' })
+    return
+  }
 })
