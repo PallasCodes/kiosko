@@ -10,5 +10,15 @@ POST http://localhost:3000/api/estado-cuenta/enviar-codigo
   Content-Type: application/json
 
 {
-  "celular": "2281237048"
+  "celular": "2281237048",
+  "rfc": "TOMB971024UW4"
+}
+
+###
+POST http://localhost:3000/api/estado-cuenta/validar-codigo
+  Content-Type: application/json
+
+{
+  "rfc": "TOMB971024UW4",
+  "codigo": "869284"
 }

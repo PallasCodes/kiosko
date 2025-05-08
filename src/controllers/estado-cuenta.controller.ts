@@ -101,7 +101,7 @@ estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
 })
 
 estadoCtaRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
-  const { celular } = req.body
+  const { celular, rfc } = req.body
 
   const codigo = getRandomCode(6)
 
@@ -110,12 +110,27 @@ estadoCtaRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
     await pool
       .request()
       .query(`SELECT dbo.fn_Sms('${celular}', '${codigo}') Envio;`)
+
+    await pool
+      .request()
+      .input('codigoValidacion', sql.VarChar, codigo)
+      .input('rfc', sql.VarChar, rfc)
+      .query(
+        `
+        INSERT INTO intermercado.dbo.codigoValidacionKiosco (codigoValidacion, rfc)
+        VALUES (@codigoValidacion, @rfc)
+        `
+      )
+
     await pool
       .request()
       .input('descripcion', sql.VarChar, `Envio de SMS al ${celular}`)
       .input('sms', sql.Int, 1)
       .query(
-        `INSERT INTO intermercado.dbo.bitacora_kiosco (descripcion, sms) VALUES (@descripcion, @sms)`
+        `
+        INSERT INTO intermercado.dbo.bitacora_kiosco (descripcion, sms)
+        VALUES (@descripcion, @sms)
+        `
       )
 
     res.status(200).json({ message: 'SMS enviado correctamente' })
@@ -124,4 +139,39 @@ estadoCtaRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error al enviar el SMS' })
     return
   }
+})
+
+estadoCtaRouter.post('/validar-codigo', async (req: Request, res: Response) => {
+  const { rfc, codigo } = req.body
+
+  const pool = await getConnection()
+  const result = await pool
+    .request()
+    .input('rfc', sql.VarChar, rfc)
+    .input('codigo', sql.VarChar, codigo)
+    .query(
+      `
+      SELECT TOP 1 * 
+      FROM intermercado.dbo.codigoValidacionKiosco WITH (NOLOCK) 
+      WHERE rfc = @rfc AND codigoValidacion = @codigo
+    `
+    )
+
+  if (result.rowsAffected[0] === 0) {
+    res.status(400).json({ message: 'Código no válido' })
+    return
+  }
+
+  await pool
+    .request()
+    .input('rfc', sql.VarChar, rfc)
+    .input('codigo', sql.VarChar, codigo)
+    .query(
+      `
+      DELETE FROM intermercado.dbo.codigoValidacionKiosco 
+      WHERE rfc = @rfc AND codigoValidacion = @codigo
+    `
+    )
+
+  res.status(200).json({ message: 'Código válido' })
 })
