@@ -14,7 +14,7 @@ estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
     .input('rfc', sql.VarChar, rfc)
     .query(
       `
-      SELECT ROW_NUMBER() OVER(ORDER BY CAST(O.tiempoLiberacion AS DATE) ASC) AS Row,
+      SELECT
         O.folioInterno AS FolioInterno,
         UPPER(CONCAT(ISNULL(PF.nombre1, ''), ' ', ISNULL(PF.nombre2, ''), ' ', ISNULL(PF.apellidoPaterno, ''), ' ', ISNULL(PF.apellidoMaterno, ''))) AS NombreCliente,
         UPPER(E.nombre) AS Convenio,

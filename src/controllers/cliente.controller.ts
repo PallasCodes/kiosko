@@ -6,13 +6,13 @@ import { getRandomCode } from '../utils/getRandomCode'
 export const clienteRouter = Router()
 
 clienteRouter.get('/buscar-cliente', async (req: Request, res: Response) => {
-  const { rfc, numCel } = req.query
+  const { rfc, celular } = req.query
 
   const pool = await getConnection()
   const result = await pool
     .request()
     .input('rfc', sql.VarChar, rfc ?? null)
-    .input('numCel', sql.VarChar, numCel ?? null)
+    .input('celular', sql.VarChar, celular ?? null)
     .query(
       `
       SELECT TOP 1 
@@ -24,10 +24,11 @@ clienteRouter.get('/buscar-cliente', async (req: Request, res: Response) => {
             ISNULL(PF.apellidoMaterno, '')
         )) AS nombre,
         C.contacto AS celular
-      FROM gbplus.dbo.personaFisica AS PF WITH (NOLOCK)
-      INNER JOIN gbplus.dbo.personaFisicaContacto AS C WITH (NOLOCK)
+      FROM dbo.personaFisica AS PF WITH (NOLOCK)
+      INNER JOIN dbo.personaFisicaContacto AS C WITH (NOLOCK)
         ON PF.idPersonaFisica = C.idPersonaFisica
-      WHERE PF.rfc = @rfc OR C.contacto = @numCel
+        WHERE ${rfc ? 'PF.rfc = @rfc' : 'C.conacto = @celular'}
+        AND C.idTipo = 1302
       `
     )
 
