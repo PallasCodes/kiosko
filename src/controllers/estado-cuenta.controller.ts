@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 
 import { getConnection, sql } from '../config/db'
-import { getRandomCode } from '../utils/getRandomCode'
+import { printPDF } from '../utils/print'
 
 export const estadoCtaRouter = Router()
 
@@ -15,28 +15,28 @@ estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
     .query(
       `
       SELECT
-        O.folioInterno AS FolioInterno,
-        UPPER(CONCAT(ISNULL(PF.nombre1, ''), ' ', ISNULL(PF.nombre2, ''), ' ', ISNULL(PF.apellidoPaterno, ''), ' ', ISNULL(PF.apellidoMaterno, ''))) AS NombreCliente,
-        UPPER(E.nombre) AS Convenio,
-        CAST(O.tiempoLiberacion AS DATE) AS FechaVenta,
+        O.folioInterno AS folioInterno,
+        UPPER(CONCAT(ISNULL(PF.nombre1, ''), ' ', ISNULL(PF.nombre2, ''), ' ', ISNULL(PF.apellidoPaterno, ''), ' ', ISNULL(PF.apellidoMaterno, ''))) AS nombreCliente,
+        UPPER(E.nombre) AS convenio,
+        CAST(O.tiempoLiberacion AS DATE) AS fechaVenta,
         O.idProductoScc,
-        UPPER(CO.nombre) AS Producto,
-        UPPER(OE.nombre) AS Estatus,
-        CONVERT(VARCHAR, O.montoDispersar, 1) AS Importe,
-        UPPER(PF.rfc) AS RFC,
-        O.idOrden AS Orden,
-        CASE WHEN C.idEntidad IN (40, 124) THEN 2 ELSE 1 END AS JasperAUsar,
-				RCT.nombreAsesorAsignado AS EnlaceAsesor,
+        UPPER(CO.nombre) AS producto,
+        UPPER(OE.nombre) AS estatus,
+        CONVERT(VARCHAR, O.montoDispersar, 1) AS importe,
+        UPPER(PF.rfc) AS rfc,
+        O.idOrden AS orden,
+        CASE WHEN C.idEntidad IN (40, 124) THEN 2 ELSE 1 END AS jasperAUsar,
+				RCT.nombreAsesorAsignado AS enlaceAsesor,
         CASE
           WHEN RCT.idSucursal = 98 THEN 1
           WHEN RCT.idSucursal IS NULL THEN 0
           ELSE 2
-        END AS EA,
+        END AS ea,
         ISNULL((
           CASE
             WHEN RCT.flujo IS NOT NULL THEN CONCAT('Obten hasta $', CONVERT(VARCHAR, ROUND(CAST(RCT.flujo AS MONEY), 0), 1))
           END
-        ), '') AS Promo
+        ), '') AS promocion
       FROM dbo.orden AS O WITH (NOLOCK)
       INNER JOIN dbo.ordenestatus AS OE WITH (NOLOCK) ON O.idEstatusActual = OE.idEstatus
       INNER JOIN dbo.cliente AS C WITH (NOLOCK) ON O.idCliente = C.idCliente
@@ -51,5 +51,9 @@ estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
     `
     )
 
-  res.status(200).json({ ...result.recordset })
+  res.status(200).json({ estadosCta: result.recordset })
+})
+
+estadoCtaRouter.post('/imprimir', async (req: Request, res: Response) => {
+  await printPDF()
 })

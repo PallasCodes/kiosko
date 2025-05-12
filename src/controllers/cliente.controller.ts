@@ -27,7 +27,7 @@ clienteRouter.get('/buscar-cliente', async (req: Request, res: Response) => {
       FROM dbo.personaFisica AS PF WITH (NOLOCK)
       INNER JOIN dbo.personaFisicaContacto AS C WITH (NOLOCK)
         ON PF.idPersonaFisica = C.idPersonaFisica
-        WHERE ${rfc ? 'PF.rfc = @rfc' : 'C.conacto = @celular'}
+        WHERE ${rfc ? 'PF.rfc = @rfc' : 'C.contacto = @celular'}
         AND C.idTipo = 1302
       `
     )
