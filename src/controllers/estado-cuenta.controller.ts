@@ -1,13 +1,11 @@
+import path from 'path'
+
 import { Router, Request, Response } from 'express'
 
 import { getConnection, sql } from '../config/db'
 import { printPDF } from '../utils/print'
 import { generatePdf } from '../utils/generatePdf'
-import {
-  generateEstadoCtaTemplate,
-  ReportPayload,
-} from '../utils/estadoCtaTemplate'
-import path from 'path'
+import { generateEstadoCtaTemplate } from '../utils/estadoCtaTemplate'
 
 export const estadoCtaRouter = Router()
 
@@ -176,17 +174,20 @@ estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
       right: 0,
     },
   }
+  const fileName = `${idOrden}-${new Date().getTime()}.pdf`
   const outputPath = path.join(
     __dirname,
     '..',
     '..',
+    'public',
     'estados-cuenta',
     idOrden.toString(),
-    `${idOrden}-${new Date().getTime()}.pdf`
+    fileName
   )
-  console.log('🚀 ~ estadoCtaRouter.post ~ outputPath:', outputPath)
 
-  const resultPdf = await generatePdf(reportContent, pdfOptions, outputPath)
+  await generatePdf(reportContent, pdfOptions, outputPath)
 
-  res.status(200).json({ resultPdf })
+  res.status(200).json({
+    urlPdf: `http://localhost:3000/estados-cuenta/${idOrden}/${fileName}`,
+  })
 })
