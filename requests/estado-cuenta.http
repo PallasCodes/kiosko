@@ -22,3 +22,21 @@ POST http://localhost:3000/api/estado-cuenta/validar-codigo
   "rfc": "TOMB971024UW4",
   "codigo": "869284"
 }
+
+###
+
+POST http://localhost:3000/api/estado-cuenta/imprimir
+  Content-Type: application/json
+
+{
+  "rfc": "TOMB971024UW4",
+  "codigo": "869284"
+}
+
+###
+POST http://localhost:3000/api/estado-cuenta/generar-pdf
+  Content-Type: application/json
+
+{
+  "idOrden": 714442
+}
