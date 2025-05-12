@@ -1,5 +1,49 @@
-module.exports = function report(payload: any) {
-  const info = payload.edoCuenta[0][0]
+export interface ReportPayload {
+  estadosCta: EstadosCta[]
+}
+
+export interface EstadosCta {
+  folioInterno: string
+  nombre: string
+  convenio: string
+  tasaMensual: string[]
+  tasaAnual: string[]
+  cat: number
+  impuesto: number
+  tipoServicio: string
+  claveCliente: string
+  periodoEmision: string
+  fechaLimitePago: string
+  saldoInicial: number
+  totalAbonado: number
+  saldoActual: number
+  fechaEmision: string
+  estadoCliente: string
+  fechaVenta: string
+  plazos: number
+  descuentoPeriodico: number
+  periodoInicio: string
+  periodoFin: string
+  Modelo: string
+  noSerie: string
+  descripcion: string
+  fecha: string
+  periodo: string
+  importe: number
+  capital: number
+  interes: number
+  iva: number
+  movimiento: string
+  origen: string
+  url: null
+  saldoVencido: null
+  idTransaccionOP: null
+  referencia: null
+  vigencia: string
+}
+
+export function generateEstadoCtaTemplate(payload: ReportPayload) {
+  const info = payload.estadosCta[0]
 
   return `
   <!DOCTYPE html>
@@ -34,15 +78,15 @@ module.exports = function report(payload: any) {
             <div>
               <div class="card">
                 <span class="label" style="font-weight: 600">INFORMACIÓN GENERAL</span>
-                <span class="block"><b>Nombre: </b>${info.Nombre}</span>
+                <span class="block"><b>Nombre: </b>${info.nombre}</span>
                 <span class="block"><b>Convenio: </b>${info.convenio}</span>
               </div>
               <div class="card" style="margin-top: 16px">
                 <span class="block"><b>Tasa Mensual: </b>${
-                  info.TasaMensual
+                  info.tasaMensual
                 }</span>
-                <span class="block"><b>Convenio: </b>${info.TasaAnual}</span>
-                <span class="block"><b>CAT: </b>${(info.CAT * 100).toFixed(
+                <span class="block"><b>Convenio: </b>${info.tasaAnual}</span>
+                <span class="block"><b>CAT: </b>${(info.cat * 100).toFixed(
                   2
                 )}%</span>
                 <span class="block"><b>IVA: </b>16%</span>
@@ -50,29 +94,29 @@ module.exports = function report(payload: any) {
             </div>
             <div class="card">
               <span class="block"><b>Tipo de servicio: </b>${
-                info.TipoServicio
+                info.tipoServicio
               }</span>
               <span class="block"><b>Clave del client: </b>${
-                info.ClaveCliente
+                info.claveCliente
               }</span>
-              <span class="block"><b>Período: </b>${info.PeriodoEmision}</span>
+              <span class="block"><b>Período: </b>${info.periodoEmision}</span>
               <span class="block"><b>Fecha límite pago: </b>${
-                info.FechaLimitePago
+                info.fechaLimitePago
               }</span>
               <span class="block"
-                ><b>Saldo inicial: </b>$${info.SaldoInicial.toLocaleString()}</span
+                ><b>Saldo inicial: </b>$${info.saldoInicial.toLocaleString()}</span
               >
               <span class="block"
-                ><b>Total abonado: </b>$${info.TotalAbonado.toLocaleString()}</span
+                ><b>Total abonado: </b>$${info.totalAbonado.toLocaleString()}</span
               >
               <span class="block"
-                ><b>Saldo actual: </b>$${info.SaldoActual.toLocaleString()}</span
+                ><b>Saldo actual: </b>$${info.saldoActual.toLocaleString()}</span
               >
               <span class="block"><b>Fecha emisión: </b>${
-                info.FechaEmision
+                info.fechaEmision
               }</span>
               <span class="block"><b>Estado del cliente: </b>${
-                info.EstadoCliente
+                info.estadoCliente
               }</span>
             </div>
           </div>
@@ -85,27 +129,27 @@ module.exports = function report(payload: any) {
             </div>
             <div>
               <b class="block">Fecha Venta:</b>
-              <span class="block">${info.FechaVenta}</span>
+              <span class="block">${info.fechaVenta}</span>
             </div>
             <div>
               <b class="block">Plazos:</b>
-              <span class="block">${info.Plazos}</span>
+              <span class="block">${info.plazos}</span>
             </div>
             <div>
               <b class="block">Descuento Periodico:</b>
-              <span class="block">$${info.DescuentoPeriodico.toLocaleString()}</span>
+              <span class="block">$${info.descuentoPeriodico.toLocaleString()}</span>
             </div>
             <div>
               <b class="block">Periodo Inicio:</b>
-              <span class="block">${info.PeriodoInicio}</span>
+              <span class="block">${info.periodoInicio}</span>
             </div>
             <div>
               <b class="block">Periodo Fin:</b>
-              <span class="block">${info.PeriodoFin}</span>
+              <span class="block">${info.periodoFin}</span>
             </div>
             <div>
               <b class="block">Importe:</b>
-              <span class="block">$${info.Importe.toLocaleString()}</span>
+              <span class="block">$${info.importe.toLocaleString()}</span>
             </div>
           </div>
 
@@ -117,18 +161,18 @@ module.exports = function report(payload: any) {
             </div>
             <div>
               <b class="block">No. Serie:</b>
-              <span class="block">${info.NoSerie}</span>
+              <span class="block">${info.noSerie}</span>
             </div>
             <div>
               <b class="block">Descripción:</b>
-              <span class="block">${info.Descripcion}</span>
+              <span class="block">${info.descripcion}</span>
             </div>
             <div>
               <b class="block">Importe:</b>
-              <span class="block">$${info.Importe.toLocaleString()}</span>
+              <span class="block">$${info.importe.toLocaleString()}</span>
             </div>
           </div>
-          <span class="block" style="margin-top: 2px"><b>Total: </b>$${info.Importe.toLocaleString()}</span>
+          <span class="block" style="margin-top: 2px"><b>Total: </b>$${info.importe.toLocaleString()}</span>
         </section>
 
       <span class="label" style="margin-top: 20px; margin-left: 40px; font-weight: 600">MOVIMIENTOS</span>
@@ -147,17 +191,17 @@ module.exports = function report(payload: any) {
         ${(function fn() {
           let html = ``
 
-          payload.edoCuenta[0].forEach((edo: any) => {
+          payload.estadosCta.forEach((edo) => {
             html += ` 
                 <tr>
-                  <td>${edo.Fecha.toLocaleString()}</td>
-                  <td>${edo.Periodo.toLocaleString()}</td>
-                  <td>$${edo.Importe.toLocaleString()}</td>
-                  <td>$${edo.Capital.toLocaleString()}</td>
-                  <td>$${edo.Interes.toLocaleString()}</td>
-                  <td>$${edo.Iva.toLocaleString()}</td>
-                  <td>${edo.Movimiento}</td>
-                  <td>${edo.Origen}</td>
+                  <td>${edo.fecha.toLocaleString()}</td>
+                  <td>${edo.periodo.toLocaleString()}</td>
+                  <td>$${edo.importe.toLocaleString()}</td>
+                  <td>$${edo.capital.toLocaleString()}</td>
+                  <td>$${edo.interes.toLocaleString()}</td>
+                  <td>$${edo.iva.toLocaleString()}</td>
+                  <td>${edo.movimiento}</td>
+                  <td>${edo.origen}</td>
                   <td>${edo.folioInterno}</td>
                 </tr>
               `

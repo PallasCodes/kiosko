@@ -2,6 +2,12 @@ import { Router, Request, Response } from 'express'
 
 import { getConnection, sql } from '../config/db'
 import { printPDF } from '../utils/print'
+import { generatePdf } from '../utils/generatePdf'
+import {
+  generateEstadoCtaTemplate,
+  ReportPayload,
+} from '../utils/estadoCtaTemplate'
+import path from 'path'
 
 export const estadoCtaRouter = Router()
 
@@ -154,5 +160,33 @@ estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
     `
     )
 
-  res.status(200).json({ estadosCta: result.recordset })
+  if (result.recordset.length === 0) {
+    res.status(404).json({ message: 'No se encontraron resultados' })
+    return
+  }
+
+  const reportContent = generateEstadoCtaTemplate({
+    estadosCta: result.recordset,
+  })
+  const pdfOptions = {
+    border: {
+      top: '30px',
+      bottom: '30px',
+      left: 0,
+      right: 0,
+    },
+  }
+  const outputPath = path.join(
+    __dirname,
+    '..',
+    '..',
+    'estados-cuenta',
+    idOrden.toString(),
+    `${idOrden}-${new Date().getTime()}.pdf`
+  )
+  console.log('🚀 ~ estadoCtaRouter.post ~ outputPath:', outputPath)
+
+  const resultPdf = await generatePdf(reportContent, pdfOptions, outputPath)
+
+  res.status(200).json({ resultPdf })
 })
