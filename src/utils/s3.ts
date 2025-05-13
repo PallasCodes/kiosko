@@ -1,4 +1,9 @@
-import { S3Client, PutObjectCommand, ObjectCannedACL } from '@aws-sdk/client-s3'
+import {
+  S3Client,
+  PutObjectCommand,
+  ObjectCannedACL,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3'
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
@@ -25,16 +30,21 @@ export async function uploadToS3({
   key,
   contentType,
 }: UploadToS3Options): Promise<string> {
-  const params = {
-    Bucket: process.env.S3_BUCKET_NAME!,
-    Key: key,
-    Body: buffer,
-    ContentType: contentType,
-    ACL: 'public-read' as ObjectCannedACL, // ACL para hacerlo público
+  try {
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+      ACL: 'public-read' as ObjectCannedACL, // ACL para hacerlo público
+    }
+
+    await s3.send(new PutObjectCommand(params))
+
+    const url = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.S3_BUCKET_NAME}/${key}`
+    return url
+  } catch (error) {
+    console.error(error)
+    throw new Error(`Error al subir a S3: ${error}`)
   }
-
-  await s3.send(new PutObjectCommand(params))
-
-  const url = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
-  return url
 }

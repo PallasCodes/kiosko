@@ -5,6 +5,8 @@ import { generateEstadoCtaTemplate } from '../utils/estadoCtaTemplate'
 import { generatePdfInBuffer } from '../utils/generatePdf'
 import { printPDF } from '../utils/print'
 import { uploadToS3 } from '../utils/s3'
+import { shortenUrl } from '../utils/bitly'
+import { sendSms } from '../dao/client.dao'
 
 export const estadoCtaRouter = Router()
 
@@ -187,4 +189,46 @@ estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
   })
 
   res.status(200).json({ pdfUrl })
+})
+
+estadoCtaRouter.post('/send-sms', async (req: Request, res: Response) => {
+  const { rfc, idOrden } = req.body
+
+  try {
+    const pool = await getConnection()
+    const result = await pool
+      .request()
+      .input('rfc', sql.VarChar, rfc)
+      .query(
+        `
+          SELECT TOP 1
+            pfc.contacto
+          FROM dbo.personaFisica pf WITH(NOLOCK)
+          LEFT JOIN dbo.personaFisicaContacto pfc WITH(NOLOCK) ON pfc.idPersonaFisica = pf.idPersonaFisica
+          WHERE pf.rfc = UPPER(@rfc) AND pfc.idTipo = 1302
+        `
+      )
+
+    if (result.rowsAffected[0] === 0) {
+      res.status(404).json({ message: 'No se encontró el cliente' })
+      return
+    }
+
+    const celular = result.recordset[0].contacto
+
+    const key = `estados-cuenta/${idOrden}/${idOrden}-${new Date().getTime()}.pdf`
+    const urlPdfS3 = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.S3_BUCKET_NAME}/${key}`
+
+    const shortUrl = await shortenUrl(urlPdfS3)
+    await sendSms(
+      celular,
+      `Tu estado de cuenta Intermercado para la orden: ${idOrden} - ${shortUrl}`
+    )
+
+    res.status(200).json({ message: 'SMS enviado correctamente' })
+  } catch (error) {
+    console.error('Error al enviar el SMS:', error)
+    res.status(500).json({ message: 'Error al enviar el SMS' })
+    return
+  }
 })

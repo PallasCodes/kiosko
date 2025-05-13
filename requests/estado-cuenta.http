@@ -7,7 +7,7 @@ GET http://localhost:3000/api/estado-cuenta/estados
 
 ###
 POST http://localhost:3000/api/estado-cuenta/enviar-codigo
-  Content-Type: application/json
+Content-Type: application/json
 
 {
   "celular": "2281237048",
@@ -16,7 +16,7 @@ POST http://localhost:3000/api/estado-cuenta/enviar-codigo
 
 ###
 POST http://localhost:3000/api/estado-cuenta/validar-codigo
-  Content-Type: application/json
+Content-Type: application/json
 
 {
   "rfc": "TOMB971024UW4",
@@ -26,7 +26,7 @@ POST http://localhost:3000/api/estado-cuenta/validar-codigo
 ###
 
 POST http://localhost:3000/api/estado-cuenta/imprimir
-  Content-Type: application/json
+Content-Type: application/json
 
 {
   "rfc": "TOMB971024UW4",
@@ -35,7 +35,7 @@ POST http://localhost:3000/api/estado-cuenta/imprimir
 
 ###
 POST http://localhost:3000/api/estado-cuenta/generar-pdf
-  Content-Type: application/json
+Content-Type: application/json
 
 {
   "idOrden": 714442
@@ -43,9 +43,19 @@ POST http://localhost:3000/api/estado-cuenta/generar-pdf
 
 ###
 POST https://api-ssl.bitly.com/v4/shorten
-  Content-Type: application/json
-  Authorization: Bearer 004b0e09b8b20d6d69db4e24df532828bc6fa9b7
+Content-Type: application/json
+Authorization: {{$dotenv BITLY_TOKEN_HEADER}} 
 
 {
   "long_url": "https://s3.us-east-1.amazonaws.com/gbplus.inter3.testing/paynet/564427_op.pdf"
+}
+
+
+### 
+POST http://localhost:3000/api/estado-cuenta/send-sms
+Content-Type: application/json
+
+{
+  "rfc": "TEST651002AJ1",
+  "idOrden": "714442VD"
 }
