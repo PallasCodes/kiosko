@@ -223,9 +223,9 @@ export function generateEstadoCtaTemplate(payload: ReportPayload) {
             ><b>Correo electrónico: </b
             ><a href="mailto:atencionclientes@intermercado.com.mx"
               >atencionclientes@intermercado.com.mx</a
-            ><b style="margin-left: 40px">Página de interenet: </b
-            ><a href="http://www.intermercado.com.mx" target="_blank"
-              >http://www.intermercado.com.mx</a
+            ><b style="margin-left: 40px">Página de internet: </b
+            ><a href="https://www.intermercado.com.mx" target="_blank"
+              >https://www.intermercado.com.mx</a
             ></span
           >
           <b class="block">
@@ -248,8 +248,8 @@ export function generateEstadoCtaTemplate(payload: ReportPayload) {
               margin-top: 6px;
             "
           >
-            <a href="http://www.intermercado.com.mx" target="_blank" style="color: white"
-              >http://www.intermercado.com.mx</a
+            <a href="https://www.intermercado.com.mx" target="_blank" style="color: white"
+              >https://www.intermercado.com.mx</a
             >
             <b>Ignacio Allende 8, Colonia Centro, Xalapa, Veracruz, C.P. 91000</b>
           </div>

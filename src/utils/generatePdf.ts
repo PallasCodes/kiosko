@@ -1,8 +1,11 @@
 import { create } from 'html-pdf'
 
-export async function generatePdf(html: string, options: any, output: string) {
+export async function generatePdfInBuffer(
+  html: string,
+  options: any
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    create(html, options).toFile(output, (err, res) => {
+    create(html, options).toBuffer((err, res) => {
       if (err) {
         reject(err)
       } else {

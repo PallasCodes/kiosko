@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 
 import { getConnection, sql } from '../config/db'
 import { getRandomCode } from '../utils/getRandomCode'

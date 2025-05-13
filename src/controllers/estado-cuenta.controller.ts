@@ -1,13 +1,21 @@
-import path from 'path'
-
-import { Router, Request, Response } from 'express'
+import { Request, Response, Router } from 'express'
 
 import { getConnection, sql } from '../config/db'
-import { printPDF } from '../utils/print'
-import { generatePdf } from '../utils/generatePdf'
 import { generateEstadoCtaTemplate } from '../utils/estadoCtaTemplate'
+import { generatePdfInBuffer } from '../utils/generatePdf'
+import { printPDF } from '../utils/print'
+import { uploadToS3 } from '../utils/s3'
 
 export const estadoCtaRouter = Router()
+
+const PDF_OPTIONS = {
+  border: {
+    top: '30px',
+    bottom: '30px',
+    left: 0,
+    right: 0,
+  },
+}
 
 estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
   const { rfc } = req.query
@@ -64,6 +72,9 @@ estadoCtaRouter.post('/imprimir', async (req: Request, res: Response) => {
 
 estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
   const { idOrden } = req.body
+
+  // TODO: verificar si ya existe el pdf en el bucket de s3
+  //       y si existe, devolver la url en lugar de generarlo nuevamente
 
   const pool = await getConnection()
   const result = await pool
@@ -166,28 +177,14 @@ estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
   const reportContent = generateEstadoCtaTemplate({
     estadosCta: result.recordset,
   })
-  const pdfOptions = {
-    border: {
-      top: '30px',
-      bottom: '30px',
-      left: 0,
-      right: 0,
-    },
-  }
+
+  const buffer = await generatePdfInBuffer(reportContent, PDF_OPTIONS)
   const fileName = `${idOrden}-${new Date().getTime()}.pdf`
-  const outputPath = path.join(
-    __dirname,
-    '..',
-    '..',
-    'public',
-    'estados-cuenta',
-    idOrden.toString(),
-    fileName
-  )
-
-  await generatePdf(reportContent, pdfOptions, outputPath)
-
-  res.status(200).json({
-    urlPdf: `http://localhost:3000/estados-cuenta/${idOrden}/${fileName}`,
+  const pdfUrl = await uploadToS3({
+    buffer,
+    key: `estados-cuenta/${idOrden}/${fileName}`,
+    contentType: 'application/pdf',
   })
+
+  res.status(200).json({ pdfUrl })
 })

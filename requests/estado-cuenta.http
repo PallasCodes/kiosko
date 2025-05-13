@@ -1,5 +1,5 @@
-GET http://localhost:3000/api/estado-cuenta/info-cliente
-  ?rfc=TEST651002AJ1
+GET http://localhost:3000/api/cliente/buscar-cliente
+  ?celular=2281237048
 
 ###
 GET http://localhost:3000/api/estado-cuenta/estados
@@ -39,4 +39,13 @@ POST http://localhost:3000/api/estado-cuenta/generar-pdf
 
 {
   "idOrden": 714442
+}
+
+###
+POST https://api-ssl.bitly.com/v4/shorten
+  Content-Type: application/json
+  Authorization: Bearer 004b0e09b8b20d6d69db4e24df532828bc6fa9b7
+
+{
+  "long_url": "https://s3.us-east-1.amazonaws.com/gbplus.inter3.testing/paynet/564427_op.pdf"
 }
