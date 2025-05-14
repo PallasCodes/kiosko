@@ -1,13 +1,12 @@
 import { getConnection, sql } from '../config/db'
 
 export async function sendSms(celular: string, smsBody: string) {
+  console.log('🚀 ~ sendSms ~ smsBody:', smsBody)
   try {
     const pool = await getConnection()
-    await pool
+    const result = await pool
       .request()
-      .input('celular', sql.VarChar, celular)
-      .input('smsBody', sql.VarChar, smsBody)
-      .query('SELECT dbo.fn_Sms(@celular, @smsBody);')
+      .query(`SELECT dbo.fn_Sms('${celular}', '${smsBody}') Envio;`)
   } catch (error) {
     console.error('Error al enviar el SMS:', error)
     throw new Error('Error al enviar el SMS')

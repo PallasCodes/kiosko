@@ -7,6 +7,7 @@ import { printPDF } from '../utils/print'
 import { uploadToS3 } from '../utils/s3'
 import { shortenUrl } from '../utils/bitly'
 import { sendSms } from '../dao/client.dao'
+import { getCurrentYearWeek } from '../utils/periodoVenta.util'
 
 export const estadoCtaRouter = Router()
 
@@ -75,8 +76,15 @@ estadoCtaRouter.post('/imprimir', async (req: Request, res: Response) => {
 estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
   const { idOrden } = req.body
 
-  // TODO: verificar si ya existe el pdf en el bucket de s3
-  //       y si existe, devolver la url en lugar de generarlo nuevamente
+  const key = `estados-cuenta/${idOrden}/${getCurrentYearWeek()}.pdf`
+  const url = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.S3_BUCKET_NAME}/${key}`
+
+  const response = await fetch(url)
+
+  if (response.ok) {
+    res.status(200).json({ pdfUrl: url })
+    return
+  }
 
   const pool = await getConnection()
   const result = await pool
@@ -181,10 +189,9 @@ estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
   })
 
   const buffer = await generatePdfInBuffer(reportContent, PDF_OPTIONS)
-  const fileName = `${idOrden}-${new Date().getTime()}.pdf`
   const pdfUrl = await uploadToS3({
     buffer,
-    key: `estados-cuenta/${idOrden}/${fileName}`,
+    key,
     contentType: 'application/pdf',
   })
 
@@ -216,14 +223,25 @@ estadoCtaRouter.post('/send-sms', async (req: Request, res: Response) => {
 
     const celular = result.recordset[0].contacto
 
-    const key = `estados-cuenta/${idOrden}/${idOrden}-${new Date().getTime()}.pdf`
+    const key = `estados-cuenta/${idOrden}/${getCurrentYearWeek()}.pdf`
     const urlPdfS3 = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.S3_BUCKET_NAME}/${key}`
 
     const shortUrl = await shortenUrl(urlPdfS3)
-    await sendSms(
-      celular,
-      `Tu estado de cuenta Intermercado para la orden: ${idOrden} - ${shortUrl}`
+    const resultSms = await pool
+      .request()
+      .query(
+        `SELECT dbo.fn_Sms('${celular}', 'Tu estado de cuenta Intermercado para la orden: ${idOrden} - ${shortUrl}') Envio;`
+      )
+
+    console.log({ resultSms: resultSms.recordset })
+    console.log(
+      `'Tu estado de cuenta Intermercado para la orden: ${idOrden} - ${shortUrl}'`
     )
+
+    // await sendSms(
+    //   celular,
+    //   `Tu estado de cuenta Intermercado para la orden: ${idOrden} - ${shortUrl}`
+    // )
 
     res.status(200).json({ message: 'SMS enviado correctamente' })
   } catch (error) {

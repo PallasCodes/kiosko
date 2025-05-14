@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express'
 
 import { getConnection, sql } from '../config/db'
 import { getRandomCode } from '../utils/getRandomCode'
+import { sendSms } from '../utils/sms.util'
 
 export const clienteRouter = Router()
 
@@ -46,10 +47,18 @@ clienteRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
   const codigo = getRandomCode(6)
 
   try {
+    // await sendSms({
+    //   message: 'Su código de validación es: ' + codigo,
+    //   phoneNumber: `+52${celular}`,
+    // })
+
     const pool = await getConnection()
-    await pool
+
+    const resultSms = await pool
       .request()
       .query(`SELECT dbo.fn_Sms('${celular}', '${codigo}') Envio;`)
+
+    console.log({ resultSms: resultSms.recordset })
 
     await pool
       .request()
