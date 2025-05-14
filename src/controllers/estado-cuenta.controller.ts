@@ -8,6 +8,7 @@ import { uploadToS3 } from '../utils/s3'
 import { shortenUrl } from '../utils/bitly'
 import { sendSms } from '../dao/client.dao'
 import { getCurrentYearWeek } from '../utils/periodoVenta.util'
+import { getSocket } from '../websocket'
 
 export const estadoCtaRouter = Router()
 
@@ -249,4 +250,15 @@ estadoCtaRouter.post('/send-sms', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error al enviar el SMS' })
     return
   }
+})
+
+estadoCtaRouter.post('/print', async (req: Request, res: Response) => {
+  const io = getSocket()
+
+  io.emit('print', {
+    message: 'Imprimiendo estado de cuenta',
+  })
+
+  res.status(200).json({ message: 'Imprimiendo estado de cuenta' })
+  return
 })
