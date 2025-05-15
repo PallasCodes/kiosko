@@ -38,6 +38,18 @@ clienteRouter.get('/buscar-cliente', async (req: Request, res: Response) => {
       return
     }
 
+    const descripcion =
+      celular === '' || !celular
+        ? 'Consulta de RFC: ' + rfc
+        : 'Consulta de celular: ' + celular
+
+    await pool
+      .request()
+      .input('descripcion', sql.VarChar, descripcion)
+      .query(
+        'INSERT INTO intermercado.dbo.bitacora_kiosco (descripcion, consulta) VALUES (@descripcion,1)'
+      )
+
     res.status(200).json({ ...result.recordset[0] })
   } catch (error) {
     console.error(
