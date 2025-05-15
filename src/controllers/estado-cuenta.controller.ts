@@ -205,29 +205,29 @@ estadoCtaRouter.post('/generar-pdf', async (req: Request, res: Response) => {
 })
 
 estadoCtaRouter.post('/send-sms', async (req: Request, res: Response) => {
-  const { rfc, idOrden } = req.body
+  const { rfc, idOrden, celular } = req.body
 
   try {
     const pool = await getConnection()
-    const result = await pool
-      .request()
-      .input('rfc', sql.VarChar, rfc)
-      .query(
-        `
-          SELECT TOP 1
-            pfc.contacto
-          FROM dbo.personaFisica pf WITH(NOLOCK)
-          LEFT JOIN dbo.personaFisicaContacto pfc WITH(NOLOCK) ON pfc.idPersonaFisica = pf.idPersonaFisica
-          WHERE pf.rfc = UPPER(@rfc) AND pfc.idTipo = 1302
-        `
-      )
+    // const result = await pool
+    //   .request()
+    //   .input('rfc', sql.VarChar, rfc)
+    //   .query(
+    //     `
+    //       SELECT TOP 1
+    //         pfc.contacto
+    //       FROM dbo.personaFisica pf WITH(NOLOCK)
+    //       LEFT JOIN dbo.personaFisicaContacto pfc WITH(NOLOCK) ON pfc.idPersonaFisica = pf.idPersonaFisica
+    //       WHERE pf.rfc = UPPER(@rfc) AND pfc.idTipo = 1302
+    //     `
+    //   )
 
-    if (result.rowsAffected[0] === 0) {
-      res.status(404).json({ message: 'No se encontró el cliente' })
-      return
-    }
+    // if (result.rowsAffected[0] === 0) {
+    //   res.status(404).json({ message: 'No se encontró el cliente' })
+    //   return
+    // }
 
-    const celular = result.recordset[0].contacto
+    // const celular = result.recordset[0].contacto
 
     const key = `estados-cuenta/${idOrden}/${getCurrentYearWeek()}.pdf`
     const urlPdfS3 = `https://s3.${process.env.AWS_REGION}.amazonaws.com/${process.env.S3_BUCKET_NAME}/${key}`
