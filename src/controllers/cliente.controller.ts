@@ -56,7 +56,7 @@ clienteRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
   const { celular, rfc } = req.body
 
   const codigo = getRandomCode(6)
-  const smsMsg = 'Tu código de verificaicón Intermercado es: ' + codigo
+  const smsMsg = 'Tu código de verificación Intermercado es: ' + codigo
 
   try {
     const pool = await getConnection()
