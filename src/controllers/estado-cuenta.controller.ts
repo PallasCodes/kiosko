@@ -257,6 +257,7 @@ estadoCtaRouter.post('/print', async (req: Request, res: Response) => {
 
   io.emit('print', {
     message: 'Imprimiendo estado de cuenta',
+    pdfUrl: req.body.pdfUrl,
   })
 
   res.status(200).json({ message: 'Imprimiendo estado de cuenta' })
