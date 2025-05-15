@@ -4,7 +4,6 @@ let io: Server
 
 export const initSocket = (server: any) => {
   io = new Server(server, {
-    path: '/ws/socket.io',
     cors: {
       origin: '*',
     },
