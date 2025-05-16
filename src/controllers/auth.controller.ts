@@ -5,7 +5,6 @@ export const authRouter = Router()
 
 authRouter.post('/login', async (req, res) => {
   const { username, password } = req.body
-  console.log('🚀 ~ authRouter.post ~ req.body:', req.body)
 
   const pool = await getConnection()
   const result = await pool
