@@ -1,10 +1,9 @@
-import { getConnection, sql } from '../config/db'
+import { getConnection } from '../config/db'
 
 export async function sendSms(celular: string, smsBody: string) {
-  console.log('🚀 ~ sendSms ~ smsBody:', smsBody)
   try {
     const pool = await getConnection()
-    const result = await pool
+    await pool
       .request()
       .query(`SELECT dbo.fn_Sms('${celular}', '${smsBody}') Envio;`)
   } catch (error) {

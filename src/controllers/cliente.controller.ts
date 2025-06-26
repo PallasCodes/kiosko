@@ -64,6 +64,87 @@ clienteRouter.get('/buscar-cliente', async (req: Request, res: Response) => {
   }
 })
 
+clienteRouter.get(
+  '/buscar-cliente-web',
+  async (req: Request, res: Response) => {
+    try {
+      const { rfc, celular } = req.query
+
+      const pool = await getConnection()
+      const result = await pool
+        .request()
+        .input('rfc', sql.VarChar, rfc ?? null)
+        .input('celular', sql.VarChar, celular ?? null)
+        .query(
+          `
+        SELECT TOP 1 
+        UPPER(PF.rfc) AS rfc,
+        UPPER(CONCAT(
+          ISNULL(PF.nombre1, ''), ' ',
+          ISNULL(PF.nombre2, ''), ' ',
+          ISNULL(PF.apellidoPaterno, ''), ' ',
+          ISNULL(PF.apellidoMaterno, '')
+          )) AS nombre,
+          C.contacto AS celular
+          FROM dbo.personaFisica AS PF WITH (NOLOCK)
+          INNER JOIN dbo.personaFisicaContacto AS C WITH (NOLOCK)
+          ON PF.idPersonaFisica = C.idPersonaFisica
+          WHERE ${rfc ? 'PF.rfc = @rfc' : 'C.contacto = @celular'}
+          AND C.idTipo = 1302
+          `
+        )
+
+      if (result.rowsAffected[0] === 0) {
+        res.status(404).json({ message: 'No se encontró el cliente' })
+        return
+      }
+
+      const descripcion =
+        celular === '' || !celular
+          ? 'Consulta de RFC: ' + rfc
+          : 'Consulta de celular: ' + celular
+
+      await pool
+        .request()
+        .input('descripcion', sql.VarChar, descripcion)
+        .query(
+          'INSERT INTO intermercado.dbo.bitacora_kiosco (descripcion, consulta) VALUES (@descripcion,1)'
+        )
+
+      const entidadesBloqueadas = await pool
+        .request()
+        .input('rfc', sql.VarChar, result.recordset[0].rfc).query(`
+          SELECT 
+            c.idEntidad
+          FROM dbo.personaFisica pf WITH (NOLOCK)
+          LEFT JOIN dbo.cliente c WITH (NOLOCK) ON c.idPersonaFisica = pf.idPersonaFisica
+          INNER JOIN dbo.entidadBloquedaEdoCta eb WITH (NOLOCK) ON eb.idEntidad = c.idEntidad
+          WHERE pf.rfc = @rfc
+        `)
+
+      if (entidadesBloqueadas.recordset.length > 0) {
+        res.status(403).json({
+          message:
+            'No se pueden consultar los estados de cuenta para tu entidad',
+        })
+        return
+      }
+
+      res.status(200).json({ ...result.recordset[0] })
+    } catch (error) {
+      console.error(
+        'Ocurrió un error al buscar tu información, verifica tu RFC o celular: ',
+        error
+      )
+      res.status(500).json({
+        message:
+          'Ocurrió un error al buscar tu información, verifica tu RFC o celular',
+      })
+      return
+    }
+  }
+)
+
 clienteRouter.post('/enviar-codigo', async (req: Request, res: Response) => {
   const { celular, rfc } = req.body
 

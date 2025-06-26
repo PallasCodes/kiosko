@@ -1,4 +1,4 @@
-import { print, getPrinters } from 'pdf-to-printer'
+import { getPrinters } from 'pdf-to-printer'
 
 export function printPDF() {
   ;(async () => {

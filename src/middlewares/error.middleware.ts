@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express'
 
 export const errorMiddleware = (
   err: Error,
@@ -6,6 +6,6 @@ export const errorMiddleware = (
   res: Response,
   _next: NextFunction
 ) => {
-  console.error("❌ Error:", err.message);
-  res.status(500).json({ error: "Internal Server Error" });
-};
+  console.error('❌ Error:', err.message)
+  res.status(500).json({ error: 'Internal Server Error' })
+}
