@@ -118,7 +118,7 @@ clienteRouter.get(
             c.idEntidad
           FROM dbo.personaFisica pf WITH (NOLOCK)
           LEFT JOIN dbo.cliente c WITH (NOLOCK) ON c.idPersonaFisica = pf.idPersonaFisica
-          INNER JOIN dbo.entidadBloquedaEdoCta eb WITH (NOLOCK) ON eb.idEntidad = c.idEntidad
+          INNER JOIN dbo.entidadBloqueadaEdoCta eb WITH (NOLOCK) ON eb.idEntidad = c.idEntidad
           WHERE pf.rfc = @rfc
         `)
 
