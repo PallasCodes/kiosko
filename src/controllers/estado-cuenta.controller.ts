@@ -395,7 +395,7 @@ estadoCtaRouter.get('/estados', async (req: Request, res: Response) => {
 718396,
 718396,
 717715,
-715604);
+715604)
       ORDER BY FechaVenta ASC
     `
     )
